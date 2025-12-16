@@ -11,6 +11,8 @@ class DiscoverViewController: UIViewController {
 
     @IBOutlet weak var collectionView: UICollectionView!
     
+    private let llmClient: LLMClient = ExternalLLMClient()
+    
     var ideasResponse = PostIdeasResponse()
     var topIdeas: [TopIdea] = []
     var trendingTopics: [TrendingTopic] = []
@@ -26,12 +28,6 @@ class DiscoverViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        
-        topIdeas = ideasResponse.topIdeas
-        trendingTopics = ideasResponse.trendingTopics
-        recommendations = ideasResponse.recommendations
-        allRecommendations = ideasResponse.recommendations
-        topicGroups = ideasResponse.topicIdeas
        
         collectionView.delegate = self
         collectionView.dataSource = self
@@ -64,7 +60,44 @@ class DiscoverViewController: UIViewController {
 
         
         collectionView.setCollectionViewLayout(generateLayout(), animated: true)
+        
+        fetchDiscoverData()
     }
+    
+    private func fetchDiscoverData() {
+        print("🚀 Starting data fetch...") // DEBUG PRINT 1
+        
+        let mockContext = MockUserContext.testUser
+        let prompt = PromptBuilder.buildPostIdeasPrompt(from: mockContext)
+
+        llmClient.generatePostIdeas(prompt: prompt) { [weak self] result in
+            DispatchQueue.main.async {
+                switch result {
+                case .success(let response):
+                    print("✅ Success! Loaded \(response.topIdeas.count) top ideas.")
+                    print("✅ First idea: \(response.topIdeas.first?.caption ?? "None")")
+                    
+                    self?.ideasResponse = response
+                    self?.bindResponseToUI()
+
+                case .failure(let error):
+                    print("LLM Error:", error)
+                }
+            }
+        }
+    }
+    
+    private func bindResponseToUI() {
+        topIdeas = ideasResponse.topIdeas
+        trendingTopics = ideasResponse.trendingTopics
+        recommendations = ideasResponse.recommendations
+        allRecommendations = ideasResponse.recommendations
+        topicGroups = ideasResponse.topicIdeas
+
+        collectionView.reloadData()
+    }
+
+
 
     func generateLayout() -> UICollectionViewLayout {
         

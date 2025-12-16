@@ -16,18 +16,18 @@ struct PostIdeasResponse: Codable {
     var recommendations: [Recommendation] = []
     var selectedPostDetails: [PostDetail] = []
 
-    init() {
-        do {
-            let response = try load()
-            topIdeas = response.topIdeas
-            trendingTopics = response.trendingTopics
-            topicIdeas = response.topicIdeas
-            recommendations = response.recommendations
-            selectedPostDetails = response.selectedPostDetails
-        } catch {
-            print("JSON Load Error:", error.localizedDescription)
-        }
-    }
+//    init() {
+//        do {
+//            let response = try load()
+//            topIdeas = response.topIdeas
+//            trendingTopics = response.trendingTopics
+//            topicIdeas = response.topicIdeas
+//            recommendations = response.recommendations
+//            selectedPostDetails = response.selectedPostDetails
+//        } catch {
+//            print("JSON Load Error:", error.localizedDescription)
+//        }
+//    }
 
 enum CodingKeys: String, CodingKey {
         case topIdeas = "top_ideas"
@@ -149,7 +149,7 @@ struct EditorDraftData {
 // JSON Loading Helper
 extension PostIdeasResponse {
 
-    func load(from filename: String = "post_ideas") throws -> PostIdeasResponse {
+    static func load(from filename: String = "post_ideas") throws -> PostIdeasResponse {
 
         guard let url = Bundle.main.url(forResource: filename, withExtension: "json") else {
             throw NSError(domain: "PostIdeasResponse",
